@@ -1,24 +1,19 @@
-//code to tell how to access cloudanary account
-
-// const cloudinary = require('cloudinary').v2;
-// const { CloudinaryStorage } = require('multer-storage-cloudinary');
-import cloudinary from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 cloudinary.config({
-    cloud_name : process.env.CLOUDNAME,
-    api_key : process.env.CLOUD_APIKEY,
-    api_secret : process.env.CLOUD_APISECRET,
+  cloud_name:  process.env.CLOUDNAME,
+  api_key:     process.env.CLOUD_APIKEY,
+  api_secret:  process.env.CLOUD_APISECRET,
 });
 
 export const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-      folder: 'Car_Dealership',
-      allowedFormates:["png" , "jpg" , "jpeg"]
-    },
+  cloudinary,
+  params: {
+    folder:          'Chat_App',
+    allowed_formats: ['png', 'jpg', 'jpeg', 'webp'],  // fixed spelling
+    resource_type:   'image',
+  },
 });
 
-// module.exports = {
-//     cloudinary , storage
-// }
+export { cloudinary };

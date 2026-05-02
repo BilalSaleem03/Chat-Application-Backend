@@ -5,36 +5,41 @@ import { User } from '../models/user.model.js';
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientID:     process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      // Ensure this matches exactly what you configured in Google Cloud Console
-      callbackURL: `${process.env.BACKEND_URL}/users/google/callback` 
+      callbackURL:  `${process.env.BACKEND_URL}/users/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        const email      = profile.emails[0].value;
+        const googleImage = profile.photos?.[0]?.value || null; // Google profile picture
 
-        const email = profile.emails[0].value;
-
-        // 1. Check if user already exists by Google ID
+        // 1. Check by Google ID
         let user = await User.findOne({ googleId: profile.id });
 
-        // 2. If not found by Google ID, check if they exist by email (Account Linking)
         if (!user) {
+          // 2. Check by email (account linking)
           user = await User.findOne({ email });
-          
+
           if (user) {
-            // Update the existing account with the Google ID
             user.googleId = profile.id;
+            if (googleImage && !user.image) user.image = googleImage;
             await user.save();
           } else {
-            // 3. Create a brand new user
+            // 3. Create new user
             user = await User.create({
               googleId: profile.id,
-              name: profile.displayName,
-              email: email,
-              // Generate a unique username based on email
-              username: email.split('@')[0] + "_" + Math.floor(Math.random() * 1000)
+              name:     profile.displayName,
+              email,
+              username: email.split('@')[0] + '_' + Math.floor(Math.random() * 1000),
+              image:    googleImage,
             });
+          }
+        } else {
+          // Update image if not set yet
+          if (googleImage && !user.image) {
+            user.image = googleImage;
+            await user.save();
           }
         }
 
