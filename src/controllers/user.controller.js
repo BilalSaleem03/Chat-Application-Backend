@@ -16,6 +16,7 @@ const sanitizeUser = (user) => ({
   name:     user.name,
   username: user.username,
   email:    user.email,
+  image:    user?.image || null,
 });
 
 // ── Register ──────────────────────────────────────────────────
